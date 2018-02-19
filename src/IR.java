@@ -12,7 +12,7 @@ public class IR {
         System.out.println("Hi, I'm gonna read some tweets now");
         //Reading terms into the
         Map<String, ir.vsr.TextStringDocument> tweets = new HashMap<String, ir.vsr.TextStringDocument>();
-        StopWords.changeStopWordsLocation("C:\\Users\\samue\\IdeaProjects\\IRA1\\data\\StopWords.txt");
+        StopWords.changeStopWordsLocation("data\\StopWords.txt");
         if (tokenizeLines(tweets, "data\\Trec_microblog11.txt")) {
             System.out.println("Read " + tweets.size() + " tweets");
         } else {
