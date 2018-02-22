@@ -2,8 +2,6 @@ import ir.vsr.*;
 import ir.utilities.StopWords;
 
 import java.io.*;
-import java.math.BigInteger;
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,6 +17,7 @@ public class IR {
             System.out.println("Failed to read tweets");
         }
         //Next step: turn our dictionary of stemmed and stopword-removed tweets into an inverted index.
+        //Plan: recreate the vsr InvertedIndex class
     }
 
     private static boolean tokenizeLines(Map<String, ir.vsr.TextStringDocument> map, String dataPath) {
