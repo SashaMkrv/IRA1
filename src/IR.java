@@ -4,6 +4,7 @@ import ir.utilities.StopWords;
 import ir.classifiers.Example;
 
 import java.io.*;
+import java.math.BigInteger;
 import java.util.*;
 
 import org.w3c.dom.*;
@@ -30,7 +31,7 @@ public class IR {
 
 
 
-//        index.processQueries();
+        index.processQueries();
 //        TextStringDocument query = new TextStringDocument("hello america states", true);
 //        HashMapVector queryMap = query.hashMapVector();
 //        Map<String, Weight> queryTokens = queryMap.hashMap;
@@ -59,7 +60,8 @@ public class IR {
                 //Create a document with this tweet, tokenizing its contents by stemming and removing stopwords
                 TextStringDocument newDoc = new TextStringDocument(tuple[1], true);
                 //Use this document to create an example object with a vector of its tokens, retaining its ID
-                Example newExample = new Example(newDoc.hashMapVector(), 0, tuple[0], newDoc);
+                //First line sometimes has header chars attached to it. Can upset BigInteger. Replace w empty strings
+                Example newExample = new Example(newDoc.hashMapVector(), 0, tuple[0].replaceAll("[^0-9]", ""), newDoc);
                 //Add this example to this list of tweets
                 tweets.add(newExample);
             }
