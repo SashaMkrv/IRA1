@@ -1,12 +1,16 @@
+import ir.utilities.Weight;
 import ir.vsr.*;
 import ir.utilities.StopWords;
 import ir.classifiers.Example;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import org.w3c.dom.*;
+import org.w3c.dom.Document;
+
+import javax.xml.parsers.*;
+import java.io.*;
 
 public class IR {
     public static void main(String[] args) {
@@ -23,6 +27,19 @@ public class IR {
         //Next step: turn our dictionary of stemmed and stopword-removed tweets into an inverted index.
         InvertedIndex index = new InvertedIndex(tweets);
         System.out.println("Successfully added " + index.size() + " terms to an inverted index.");
+
+
+
+//        index.processQueries();
+//        TextStringDocument query = new TextStringDocument("hello america states", true);
+//        HashMapVector queryMap = query.hashMapVector();
+//        Map<String, Weight> queryTokens = queryMap.hashMap;
+//        for (String str: queryTokens.keySet()) {
+//            System.out.println(index.tokenHash.get(str));
+//        }
+        List<Query> queries = new LinkedList<>();
+        parseQueries(queries, "data\\topics_MB1-49.txt");
+        System.out.println("Parsed " + queries.size() + " queries.");
     }
 
     private static boolean tokenizeLines(List<Example> tweets, String dataPath) {
@@ -49,6 +66,49 @@ public class IR {
         } catch (IOException e) {
             System.out.println(e.toString() + ": Error while reading file on line " + lineCount);
             return false;
+        }
+        return true;
+    }
+
+    private static boolean parseQueries(List<Query> queryList, String filePath){
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = null;
+        Document document;
+        try {
+            //no root element, need to accomodate
+            File file = new File(filePath);
+            FileInputStream fis = new FileInputStream(file);
+            List<InputStream> stream = Arrays.asList(
+                    new ByteArrayInputStream("<root>".getBytes()),
+                            fis,
+                            new ByteArrayInputStream(("</root>".getBytes()))
+            );
+
+            InputStream cntr =  new SequenceInputStream(Collections.enumeration(stream));
+            builder = factory.newDocumentBuilder();
+            document = builder.parse(cntr);
+        } catch (Exception e) {
+            System.out.println(e.toString());
+            return false;
+        }
+
+        //Element root = document.getDocumentElement();
+
+        NodeList nodes = document.getElementsByTagName("top");
+        Node node;
+        Element element;
+        String id;
+        String query;
+        for (int i = 0; i < nodes.getLength(); i++){
+            node = nodes.item(i);
+            element = (Element) node;
+            try {
+                id = element.getElementsByTagName("num").item(0).getTextContent();
+                query = element.getElementsByTagName("title").item(0).getTextContent();
+                queryList.add(new Query(id, query));
+            } catch (Exception e) {
+                continue;
+            }
         }
         return true;
     }
