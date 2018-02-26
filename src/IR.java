@@ -7,7 +7,7 @@ import java.io.*;
 import java.math.BigInteger;
 import java.util.*;
 
-import jdk.internal.org.objectweb.asm.tree.TryCatchBlockNode;
+//import jdk.internal.org.objectweb.asm.tree.TryCatchBlockNode;
 import org.w3c.dom.*;
 import org.w3c.dom.Document;
 
@@ -181,6 +181,7 @@ public class IR {
                 if (i >= 1000) { break; }
             }
         }
+        writer.close();
         return true;
     }
 }
