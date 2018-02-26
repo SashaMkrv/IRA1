@@ -29,18 +29,27 @@ public class IR {
         InvertedIndex index = new InvertedIndex(tweets);
         System.out.println("Successfully added " + index.size() + " terms to an inverted index.");
 
-
-
-        index.processQueries();
-//        TextStringDocument query = new TextStringDocument("hello america states", true);
-//        HashMapVector queryMap = query.hashMapVector();
-//        Map<String, Weight> queryTokens = queryMap.hashMap;
-//        for (String str: queryTokens.keySet()) {
-//            System.out.println(index.tokenHash.get(str));
-//        }
         List<Query> queries = new LinkedList<>();
         parseQueries(queries, "data\\topics_MB1-49.txt");
         System.out.println("Parsed " + queries.size() + " queries.");
+
+//        Retrieval[] results;
+//        int i;
+//        for (Query query: queries) {
+//            results = index.retrieve(query.query);
+//            i = 0;
+//            for (Retrieval result: results) {
+//                i++;
+//                System.out.println(query.id + "\tQ0\t" + result.docRef.toString() +
+//                "\t" + i + "\t" + result.score  + "\t" + "aRun");
+//                if (i > 1000) { break; }
+//            }
+//        }
+
+        String runName = "aRun";
+        if(writeQueryResults(queries, index, runName)) {
+            System.out.println("Wrote results to file " + runName + ".txt");
+        }
     }
 
     private static boolean tokenizeLines(List<Example> tweets, String dataPath) {
@@ -105,11 +114,42 @@ public class IR {
             node = nodes.item(i);
             element = (Element) node;
             try {
-                id = element.getElementsByTagName("num").item(0).getTextContent();
+                id = element.getElementsByTagName("num").item(0).getTextContent().split(" ")[2];
                 query = element.getElementsByTagName("title").item(0).getTextContent();
                 queryList.add(new Query(id, query));
             } catch (Exception e) {
                 continue;
+            }
+        }
+        return true;
+    }
+
+    static private boolean writeQueryResults(List<Query> queries, InvertedIndex index, String runName) {
+        Retrieval[] results;
+        int i;
+
+        //check if runName is all whitespace
+        if (runName.replaceAll("[\\s]", "").equals("")) {
+            System.out.println("Cannot have empty string for run name");
+            return false;
+        }
+
+        PrintWriter writer = null;
+        try {
+            writer = new PrintWriter(runName + ".txt", "UTF-8");
+        } catch (Exception e) {
+            System.out.println(e);
+            return false;
+        }
+
+        for (Query query: queries) {
+            results = index.retrieve(query.query);
+            i = 0;
+            for (Retrieval result: results) {
+                i++;
+                writer.println(query.id + "\tQ0\t" + result.docRef.toString() +
+                        "\t" + i + "\t" + result.score  + "\t" + runName);
+                if (i >= 1000) { break; }
             }
         }
         return true;
