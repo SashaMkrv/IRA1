@@ -7,6 +7,7 @@ import java.io.*;
 import java.math.BigInteger;
 import java.util.*;
 
+import jdk.internal.org.objectweb.asm.tree.TryCatchBlockNode;
 import org.w3c.dom.*;
 import org.w3c.dom.Document;
 
@@ -15,22 +16,46 @@ import java.io.*;
 
 public class IR {
     public static void main(String[] args) {
+        String tweetsLoc = "data\\Trec_microblog11.txt";
+        String stopWordsLoc = "data\\StopWords.txt";
+        String queriesLoc = "data\\topics_MB1-49.txt";
+
+        if (args.length > 2) {
+            queriesLoc = args[2];
+        }
+        if (args.length > 1) {
+            stopWordsLoc = args[1];
+        }
+        if (args.length > 0) {
+            tweetsLoc = args[0];
+        }
+        //Start
         System.out.println("Hi, I'm gonna read some tweets now");
-        //Reading terms into the
-        //Map<String, ir.vsr.TextStringDocument> tweets = new HashMap<String, ir.vsr.TextStringDocument>();
-        List<Example> tweets = new LinkedList<Example>();
-        StopWords.changeStopWordsLocation("data\\StopWords.txt");
-        if (tokenizeLines(tweets, "data\\Trec_microblog11.txt")) {
-            System.out.println("Read " + tweets.size() + " tweets");
-        } else {
-            System.out.println("Failed to read tweets");
+        List<Example> tweets = new LinkedList<>();
+        //Load stopwords
+        try {
+            StopWords.changeStopWordsLocation(stopWordsLoc);
+        } catch (Exception e) {
+            System.out.println("Error reading stopwords at " + stopWordsLoc);
+            System.exit(0);
+        }
+        try {
+            if (tokenizeLines(tweets, tweetsLoc)) {
+                System.out.println("Read " + tweets.size() + " tweets");
+            } else {
+                System.out.println("Failed to read tweets");
+                System.exit(0);
+            }
+        }catch (Exception e) {
+            System.out.println("Error reading tweets at " + tweetsLoc);
+            System.exit(0);
         }
         //Next step: turn our dictionary of stemmed and stopword-removed tweets into an inverted index.
         InvertedIndex index = new InvertedIndex(tweets);
         System.out.println("Successfully added " + index.size() + " terms to an inverted index.");
 
         List<Query> queries = new LinkedList<>();
-        parseQueries(queries, "data\\topics_MB1-49.txt");
+        parseQueries(queries, queriesLoc);
         System.out.println("Parsed " + queries.size() + " queries.");
 
 //        Retrieval[] results;
@@ -98,7 +123,11 @@ public class IR {
             InputStream cntr =  new SequenceInputStream(Collections.enumeration(stream));
             builder = factory.newDocumentBuilder();
             document = builder.parse(cntr);
-        } catch (Exception e) {
+        } catch (FileNotFoundException f) {
+            System.out.println("Error reading query file " + filePath);
+            return false;
+        }
+        catch (Exception e) {
             System.out.println(e.toString());
             return false;
         }
